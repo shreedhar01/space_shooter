@@ -1,6 +1,6 @@
 import pygame
 from os.path import join
-from random import randint
+from random import randint,uniform
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -40,8 +40,7 @@ class Player(pygame.sprite.Sprite):
         #     laser = Laser(laser_surf, self.rect.midtop, all_sprites)
         #     self.can_shoot = False
         #     self.laser_shoot_time = pygame.time.get_ticks()
-     
-        
+            
 class Stars(pygame.sprite.Sprite):
     def __init__(self, groups, star_surf):
         super().__init__(groups)
@@ -57,6 +56,21 @@ class Laser(pygame.sprite.Sprite):
     def update(self, dt):
         self.rect.centery -= 400 * dt
 
+class Meteor(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, groups):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(center= pos)
+        self.start_time = pygame.time.get_ticks()
+        self.life_time = 2500 
+        self.direction = pygame.math.Vector2(uniform(-0.5, 0.5), 1)
+        self.speed = randint(300, 400)
+
+    def update(self,dt):
+        self.rect.center += self.direction* self.speed * dt
+        if pygame.time.get_ticks() - self.start_time >= self.life_time:
+            self.kill()
+
 #general setup
 pygame.init()
 window_width,window_height = 1280, 700
@@ -65,16 +79,16 @@ pygame.display.set_caption('Space Shooter')
 running = True
 clock = pygame.time.Clock()
 
-all_sprites = pygame.sprite.Group()
+#import surf
 star_surf = pygame.image.load(join('images','star.png')).convert_alpha()
+meteor_surf = pygame.image.load(join('images','meteor.png')).convert_alpha()
+laser_surf = pygame.image.load(join('images','laser.png')).convert_alpha()
+
+#sprites
+all_sprites = pygame.sprite.Group()
 for i in range(20):
     star = Stars(all_sprites,star_surf)
 player = Player(all_sprites)
-
-meteor_surf = pygame.image.load(join('images','meteor.png')).convert_alpha()
-meteor_pos_frec = meteor_surf.get_frect(center = (window_width/2, window_height/2))
-
-laser_surf = pygame.image.load(join('images','laser.png')).convert_alpha()
 
 #costume time -> meteor event
 meteor_event = pygame.event.custom_type()
@@ -87,7 +101,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == meteor_event:
-            pass
+            x, y = randint(0, window_width), randint(-100, -50)
+            Meteor(meteor_surf, (x,y), all_sprites )
 
     all_sprites.update(dt)
 
