@@ -10,6 +10,17 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2()
         self.speed = 200
 
+        #cooldown time -> leaser
+        self.can_shoot = True
+        self.laser_shoot_time = 0
+        self.cooldown_duration = 40
+
+    def laser_time(self):
+        if not self.can_shoot:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.laser_shoot_time >= self.cooldown_duration:
+                self.can_shoot = True
+
     def update(self, dt):
         keys = pygame.key.get_pressed()
         self.direction.x = int(keys[pygame.K_RIGHT]) - keys[pygame.K_LEFT]
@@ -17,18 +28,34 @@ class Player(pygame.sprite.Sprite):
         self.direction = self.direction.normalize() if self.direction else self.direction
         self.rect.center += self.direction * self.speed * dt
 
-        self.recent_key = pygame.key.get_just_pressed()
-        if self.recent_key[pygame.K_SPACE]:
-            laser_dir.y -= 1
-        else:
-            laser_dir.y = 0
-        #laser_pos_frec.center += laser_dir * laser_speed * dt
+        recent_key = pygame.key.get_just_pressed()
+        if recent_key[pygame.K_SPACE] and self.can_shoot:
+            laser = Laser(laser_surf, self.rect.midtop, all_sprites)
+            self.can_shoot = False
+            self.laser_shoot_time = pygame.time.get_ticks()  
 
+        self.laser_time()
+
+        # if keys[pygame.K_SPACE] and self.can_shoot:
+        #     laser = Laser(laser_surf, self.rect.midtop, all_sprites)
+        #     self.can_shoot = False
+        #     self.laser_shoot_time = pygame.time.get_ticks()
+     
+        
 class Stars(pygame.sprite.Sprite):
     def __init__(self, groups, star_surf):
         super().__init__(groups)
         self.image = star_surf
         self.rect = self.image.get_frect(center = (randint(0,window_width),randint(0,window_height)))
+
+class Laser(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, groups):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(midbottom = pos)
+
+    def update(self, dt):
+        self.rect.centery -= 400 * dt
 
 #general setup
 pygame.init()
@@ -48,9 +75,10 @@ meteor_surf = pygame.image.load(join('images','meteor.png')).convert_alpha()
 meteor_pos_frec = meteor_surf.get_frect(center = (window_width/2, window_height/2))
 
 laser_surf = pygame.image.load(join('images','laser.png')).convert_alpha()
-laser_pos_frec = laser_surf.get_frect(bottomleft = (20, window_height - 20))
-laser_dir = pygame.math.Vector2()
-laser_speed = 500
+
+#costume time -> meteor event
+meteor_event = pygame.event.custom_type()
+pygame.time.set_timer(meteor_event, 500)
 
 while running:
     dt = clock.tick() / 1000
@@ -58,6 +86,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == meteor_event:
+            pass
 
     all_sprites.update(dt)
 
