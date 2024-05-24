@@ -8,6 +8,7 @@ window_width,window_height = 1280, 700
 display_surface = pygame.display.set_mode((window_width,window_height))
 pygame.display.set_caption('Space Shooter')
 running = True
+clock = pygame.time.Clock()
 
 # plain surface
 surf = pygame.Surface((100,200))
@@ -17,7 +18,8 @@ x,y = 0,0
 # importing an image
 player_surf = pygame.image.load(join('images','player.png')).convert_alpha()
 player_rect = player_surf.get_frect(center = (window_width/2, window_height/2))
-player_dir = 1
+player_dir = pygame.math.Vector2(1, 1)
+player_speed = 300
 
 star_img = pygame.image.load(join('images','star.png')).convert_alpha()
 star_pos = [(randint(0,window_width), randint(0,window_height)) for i in range(20)]
@@ -29,6 +31,7 @@ laser_img = pygame.image.load(join('images','laser.png')).convert_alpha()
 laser_pos_frec = laser_img.get_frect(bottomleft = (20, window_height - 20))
 
 while running:
+    dt = clock.tick() / 1000
     #event loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -43,9 +46,13 @@ while running:
     display_surface.blit(laser_img, laser_pos_frec)
 
     #player movement
-    player_rect.right += player_dir * 0.4
+
+    if player_rect.bottom > window_height or player_rect.top < 0:
+        player_dir.y *= -1
     if player_rect.right > window_width or player_rect.left < 0:
-        player_dir *= -1
+        player_dir.x *= -1
+    player_rect.center += player_dir * player_speed * dt
+    
     display_surface.blit(player_surf, player_rect)
     pygame.display.update()
 
