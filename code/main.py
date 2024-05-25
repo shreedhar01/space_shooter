@@ -1,6 +1,7 @@
 import pygame
 from os.path import join
 from random import randint,uniform
+import time
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, groups):
@@ -35,7 +36,8 @@ class Player(pygame.sprite.Sprite):
         if recent_key[pygame.K_SPACE] and self.can_shoot:
             Laser(laser_surf, self.rect.midtop, (all_sprites, laser_sprites))
             self.can_shoot = False
-            self.laser_shoot_time = pygame.time.get_ticks()  
+            self.laser_shoot_time = pygame.time.get_ticks()
+            laser_sound.play()
 
         self.laser_time()
             
@@ -91,12 +93,13 @@ class AnimitedExplosion(pygame.sprite.Sprite):
         else:
             self.kill() 
 
-
 def collisons():
     global running
 
     collision_sprites = pygame.sprite.spritecollide(player, meteor_sprites, True, pygame.sprite.collide_mask)  # Ensure meteors are removed on collision
     if collision_sprites:
+        damage_sound.play()
+        time.sleep(2)
         running = False
 
     for lasers in laser_sprites:
@@ -104,6 +107,7 @@ def collisons():
         if collided_sprite:
             lasers.kill()
             AnimitedExplosion(explosion_frame, lasers.rect.midtop, all_sprites)
+            explosion_sound.play()
 
 def displayer():
     current_time  = pygame.time.get_ticks() // 100
@@ -127,7 +131,14 @@ meteor_surf = pygame.image.load(join('images','meteor.png')).convert_alpha()
 laser_surf = pygame.image.load(join('images','laser.png')).convert_alpha()
 font = pygame.font.Font(join('images','Oxanium-Bold.ttf'), 40)
 explosion_frame = [ pygame.image.load(join('images','explosion',f'{i}.png')).convert_alpha() for i in range(21)]
-print(explosion_frame)
+
+laser_sound = pygame.mixer.Sound(join('audio','laser.wav'))
+laser_sound.set_volume(0.5)
+explosion_sound = pygame.mixer.Sound(join('audio','explosion.wav'))
+damage_sound = pygame.mixer.Sound(join('audio','damage.ogg'))
+game_sound = pygame.mixer.Sound(join('audio','game_music.wav'))
+game_sound.set_volume(0.3)
+game_sound.play()
 
 #sprites
 all_sprites = pygame.sprite.Group()
