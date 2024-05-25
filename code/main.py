@@ -15,6 +15,9 @@ class Player(pygame.sprite.Sprite):
         self.laser_shoot_time = 0
         self.cooldown_duration = 400  
 
+        #mask
+        #self.mask = pygame.mask.from_surface()
+
     def laser_time(self):
         if not self.can_shoot:
             current_time = pygame.time.get_ticks()
@@ -69,7 +72,7 @@ class Meteor(pygame.sprite.Sprite):
 def collisons():
     global running
 
-    collision_sprites = pygame.sprite.spritecollide(player, meteor_sprites, True)  # Ensure meteors are removed on collision
+    collision_sprites = pygame.sprite.spritecollide(player, meteor_sprites, True, pygame.sprite.collide_mask)  # Ensure meteors are removed on collision
     if collision_sprites:
         running = False
 
@@ -79,7 +82,7 @@ def collisons():
             lasers.kill()
 
 def displayer():
-    current_time = pygame.time.get_ticks() // 100
+    current_time  = pygame.time.get_ticks() // 100
     text_surface = font.render(str(current_time), True, (240,240,240))
     text_rec = text_surface.get_frect(midbottom= (window_width/2, window_height - 50))
     display_surface.blit(text_surface, text_rec)
