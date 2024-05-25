@@ -63,9 +63,9 @@ class Meteor(pygame.sprite.Sprite):
         self.image = self.orginal_surf
         self.rect = self.image.get_frect(center= pos)
         self.start_time = pygame.time.get_ticks()
-        self.life_time = 2500 
+        self.life_time = 4000 
         self.direction = pygame.math.Vector2(uniform(-0.5, 0.5), 1)
-        self.speed = randint(200, 300)
+        self.speed = randint(300, 400)
         self.rotation = 0
         self.rotation_speed = randint(40,50)
 
